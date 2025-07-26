@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>My Mood Logger</title>
+<style>
+  body {
+    margin: 0;
+    font-family: "Times New Roman", serif;
+    overflow: hidden;
+    background: white;
+  }
+  .screen {
+    display: none;
+    height: 100vh;
+    width: 100vw;
+    position: relative;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  .active {
+    display: flex;
+  }
+
+  /* Screen 1 styles */
+  #screen1 {
+    background: white;
+    color: black;
+  }
+  #screen1 h1 {
+    font-size: 96px;
+    margin-bottom: 120px;
+    text-align: center;
+    text-transform: capitalize;
+  }
+  /* Begin button style */
+  .script-button {
+    font-family: "Brush Script MT", cursive;
+    font-size: 36px;
+    background: none;
+    border: none;
+    color: black;
+    cursor: pointer;
+    margin-top: auto;
+    margin-bottom: 100px;
+    padding: 0;
+  }
+
+  /* Screens 2-5 have black bg and white text */
+  #screen2, #screen3, #screen4, #screen5 {
+    background: black;
+    color: white;
+  }
+  h2 {
+    font-size: 48px;
+    margin-bottom: 50px;
+    text-align: center;
+    text-transform: capitalize;
+  }
+
+  /* Mood buttons 3x3 grid */
+  .mood-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    width: 360px;
+    margin: 0 auto 40px;
+  }
+  .mood-buttons button {
+    border-radius: 12px;
+    border: none;
+    color: white;
+    font-size: 20px;
+    padding: 15px 0;
+    cursor: pointer;
+    text-align: center;
+    user-select: none;
+    transition: box-shadow 0.3s ease;
+  }
+  .mood-buttons button:nth-child(1) { background-color:#4B9CD3; }  /* Happy */
+  .mood-buttons button:nth-child(2) { background-color:#5A9BD4; }  /* Sad */
+  .mood-buttons button:nth-child(3) { background-color:#6495ED; }  /* Mad */
+  .mood-buttons button:nth-child(4) { background-color:#4682B4; }  /* Numb */
+  .mood-buttons button:nth-child(5) { background-color:#1E90FF; }  /* Anxious */
+  .mood-buttons button:nth-child(6) { background-color:#4169E1; }  /* Envious */
+  .mood-buttons button:nth-child(7) { background-color:#3B5998; }  /* Fearful */
+  .mood-buttons button:nth-child(8) { background-color:#0F52BA; }  /* Excited */
+  .mood-buttons button:nth-child(9) { background-color:#007FFF; }  /* Calm */
+
+  /* Intensity buttons container */
+  .intensity-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+  .intensity-buttons button {
+    border-radius: 12px;
+    width: 60px;
+    height: 60px;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    user-select: none;
+    transition: box-shadow 0.3s ease;
+  }
+  /* Red shades from #ff4d4d (bright) to #4c0a0a (dark) */
+  .intensity-buttons button:nth-child(1)  { background-color: #ff4d4d; }
+  .intensity-buttons button:nth-child(2)  { background-color: #e64545; }
+  .intensity-buttons button:nth-child(3)  { background-color: #cc3b3b; }
+  .intensity-buttons button:nth-child(4)  { background-color: #b33333; }
+  .intensity-buttons button:nth-child(5)  { background-color: #991f1f; }
+  .intensity-buttons button:nth-child(6)  { background-color: #8a1a1a; }
+  .intensity-buttons button:nth-child(7)  { background-color: #7a1616; }
+  .intensity-buttons button:nth-child(8)  { background-color: #6b1212; }
+  .intensity-buttons button:nth-child(9)  { background-color: #5b0e0e; }
+  .intensity-buttons button:nth-child(10) { background-color: #4c0a0a; }
+
+  /* Selected button glow */
+  .selected {
+    box-shadow: 0 0 10px 5px white;
+  }
+
+  /* Nav buttons container */
+  .nav-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    width: 360px;
+  }
+  .nav-buttons button {
+    font-family: "Times New Roman", serif;
+    font-size: 24px;
+    padding: 10px 30px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background-color: #333;
+    color: white;
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+  .nav-buttons button:hover {
+    background-color: #555;
+  }
+  /* Submit button */
+  #submitBtn {
+    border: 2px solid white;
+    background-color: #333;
+    color: white;
+    font-family: "Times New Roman", serif;
+    font-size: 24px;
+    padding: 10px 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease;
+    margin-top: 30px;
+  }
+  #submitBtn:hover {
+    background-color: #555;
+  }
+  /* Notes textarea */
+  #notes {
+    width: 360px;
+    height: 150px;
+    font-family: "Times New Roman", serif;
+    font-size: 18px;
+    padding: 12px;
+    box-sizing: border-box;
+    resize: none;
+    margin-bottom: 30px;
+    color: black;
+  }
+  /* Final screen h2 bigger */
+  #screen5 h2 {
+    font-size: 54px;
+  }
+
+  /* Stars - gold and bigger */
+  .stars {
+    position: fixed;
+    width: 72px;
+    height: 72px;
+    fill: gold;
+    z-index: 9999;
+    pointer-events: auto;
+  }
+  .stars.br {
+    cursor: pointer;
+  }
+  .tl { top: 10px; left: 10px; }
+  .tr { top: 10px; right: 10px; }
+  .bl { bottom: 10px; left: 10px; }
+  .br { bottom: 10px; right: 10px; }
+</style>
+</head>
+<body>
+
+<!-- Gold stars -->
+<svg class="stars tl" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+<svg class="stars tr" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+<svg class="stars bl" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+<svg class="stars br" viewBox="0 0 24 24" onclick="openSheet()" title="Open Google Sheet"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+
+<!-- Screen 1 -->
+<div id="screen1" class="screen active">
+  <h1>My Mood Logger</h1>
+  <button class="script-button" onclick="goToScreen(2)">Begin</button>
+</div>
+
+<!-- Screen 2 -->
+<div id="screen2" class="screen">
+  <h2>Select your mood</h2>
+  <div class="mood-buttons">
+    <button style="background:#4B9CD3" onclick="selectMood('Happy', this)">Happy</button>
+    <button style="background:#5A9BD4" onclick="selectMood('Sad', this)">Sad</button>
+    <button style="background:#6495ED" onclick="selectMood('Mad', this)">Mad</button>
+    <button style="background:#4682B4" onclick="selectMood('Numb', this)">Numb</button>
+    <button style="background:#1E90FF" onclick="selectMood('Anxious', this)">Anxious</button>
+    <button style="background:#4169E1" onclick="selectMood('Envious', this)">Envious</button>
+    <button style="background:#3B5998" onclick="selectMood('Fearful', this)">Fearful</button>
+    <button style="background:#0F52BA" onclick="selectMood('Excited', this)">Excited</button>
+    <button style="background:#007FFF" onclick="selectMood('Calm', this)">Calm</button>
+  </div>
+  <div class="nav-buttons">
+    <button onclick="goToScreen(1)">Back</button>
+    <button id="next2" onclick="goToScreen(3)" style="display:none;">Next</button>
+  </div>
+</div>
+
+<!-- Screen 3 -->
+<div id="screen3" class="screen">
+  <h2>Rate intensity of this emotion 1-10</h2>
+  <div class="intensity-buttons">
+    <button style="background:#ff4d4d" onclick="selectIntensity(1, this)">1</button>
+    <button style="background:#e64545" onclick="selectIntensity(2, this)">2</button>
+    <button style="background:#cc3b3b" onclick="selectIntensity(3, this)">3</button>
+    <button style="background:#b33333" onclick="selectIntensity(4, this)">4</button>
+    <button style="background:#991f1f" onclick="selectIntensity(5, this)">5</button>
+    <button style="background:#8a1a1a" onclick="selectIntensity(6, this)">6</button>
+    <button style="background:#7a1616" onclick="selectIntensity(7, this)">7</button>
+    <button style="background:#6b1212" onclick="selectIntensity(8, this)">8</button>
+    <button style="background:#5b0e0e" onclick="selectIntensity(9, this)">9</button>
+    <button style="background:#4c0a0a" onclick="selectIntensity(10, this)">10</button>
+  </div>
+  <div class="nav-buttons">
+    <button onclick="goToScreen(2)">Back</button>
+    <button id="next3" onclick="goToScreen(4)" style="display:none;">Next</button>
+  </div>
+</div>
+
+<!-- Screen 4 -->
+<div id="screen4" class="screen">
+  <h2>Any notes?</h2>
+  <textarea id="notes" placeholder="Type here..."></textarea>
+  <button id="submitBtn" onclick="submitData()">Submit</button>
+  <div class="nav-buttons" style="margin-top:20px;">
+    <button onclick="goToScreen(3)">Back</button>
+  </div>
+</div>
+
+<!-- Screen 5 -->
+<div id="screen5" class="screen" style="position: relative; overflow: hidden;">
+  <h2>Thank you, answers logged! See you later.</h2>
+  <canvas id="fireworksCanvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></canvas>
+</div>
+
+<script>
+function formatTimestamp() {
+  const now = new Date();
+
+  // Pad function to add leading zero
+  const pad = (num) => num.toString().padStart(2, '0');
+
+  let hours = now.getHours();
+  const minutes = pad(now.getMinutes());
+  const ampm = hours >= 12 ? 'pm' : 'am';
+
+  // Convert 24h to 12h format
+  hours = hours % 12;
+  if (hours === 0) hours = 12;
+
+  // Format: 0/00/0000, 12:00am
+  return `${now.getMonth() + 1}/${pad(now.getDate())}/${now.getFullYear()}, ${hours}:${minutes}${ampm}`;
+}
+
+
+
+  let mood = '';
+  let intensity = '';
+  let fireworksStarted = false;
+
+  function selectMood(selectedMood, el) {
+    mood = selectedMood;
+    // Clear all selected from mood buttons
+    document.querySelectorAll('#screen2 .mood-buttons button').forEach(btn => btn.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('next2').style.display = 'inline-block';
+  }
+
+  function selectIntensity(selectedIntensity, el) {
+    intensity = selectedIntensity;
+    document.querySelectorAll('#screen3 .intensity-buttons button').forEach(btn => btn.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('next3').style.display = 'inline-block';
+  }
+
+  function goToScreen(num) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen' + num).classList.add('active');
+
+    if (num === 2) {
+      document.getElementById('next2').style.display = mood ? 'inline-block' : 'none';
+    }
+    if (num === 3) {
+      document.getElementById('next3').style.display = intensity ? 'inline-block' : 'none';
+    }
+
+    if (num === 5 && !fireworksStarted) {
+      fireworksStarted = true;
+      resizeCanvas();
+      loop();
+    }
+  }
+
+  function submitData() {
+    if (!mood) {
+      alert("Please select a mood.");
+      goToScreen(2);
+      return;
+    }
+    if (!intensity) {
+      alert("Please select intensity.");
+      goToScreen(3);
+      return;
+    }
+
+    const notes = document.getElementById('notes').value;
+
+    // Replace with your Google Apps Script Web App URL here:
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycbwBzHyk6LylIhqVqDVoIJHAsJxPbL6d_pIC9Pv2DSxJrNlwI5tdPJ93pjZiLP9tqiQF2Q/exec';
+
+    fetch(scriptUrl, {
+      method: 'POST',
+      mode: 'no-cors', // to prevent CORS error; no response expected
+      headers: {
+        'Content-Type': 'application/json',
+      },
+     body: JSON.stringify({
+  mood: mood,
+  intensity: intensity,
+  notes: notes,
+timestamp: formatTimestamp(),
+
+ 
+
+}),
+
+    }).catch(() => {
+      alert('Failed to save data. Check your internet connection.');
+    });
+
+    goToScreen(5);
+  }
+
+  // Open your Google Sheet link
+  function openSheet() {
+    window.open('https://docs.google.com/spreadsheets/d/1VqSuf5E6uU8IbQvBgkW_T2WAGUuriii8FmSXRaX0RAI/edit?usp=sharing', '_blank');
+  }
+
+  // Fireworks code
+  const canvas = document.getElementById('fireworksCanvas');
+  const ctx = canvas.getContext('2d');
+  let cw, ch;
+  let fireworks = [];
+  let particles = [];
+
+  function random(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  function resizeCanvas() {
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+    cw = canvas.width;
+    ch = canvas.height;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  class Firework {
+    constructor(sx, sy, tx, ty) {
+      this.x = sx;
+      this.y = sy;
+      this.sx = sx;
+      this.sy = sy;
+      this.tx = tx;
+      this.ty = ty;
+      this.distanceToTarget = Math.hypot(tx - sx, ty - sy);
+      this.distanceTraveled = 0;
+      this.coordinates = [];
+      this.coordinateCount = 3;
+      while (this.coordinateCount--) {
+        this.coordinates.push([this.x, this.y]);
+      }
+      this.angle = Math.atan2(ty - sy, tx - sx);
+      this.speed = 4;
+      this.brightness = random(50, 70);
+      this.targetRadius = 8;
+    }
+    update(index) {
+      this.coordinates.pop();
+      this.coordinates.unshift([this.x, this.y]);
+
+      const vx = Math.cos(this.angle) * this.speed;
+      const vy = Math.sin(this.angle) * this.speed;
+      this.distanceTraveled = Math.hypot(this.x + vx - this.sx, this.y + vy - this.sy);
+
+      if (this.distanceTraveled >= this.distanceToTarget) {
+        createParticles(this.tx, this.ty);
+        fireworks.splice(index, 1);
+      } else {
+        this.x += vx;
+        this.y += vy;
+      }
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.moveTo(this.coordinates[this.coordinates.length - 1][0], this.coordinates[this.coordinates.length - 1][1]);
+      ctx.lineTo(this.x, this.y);
+      ctx.strokeStyle = `hsl(${random(0, 360)}, 100%, ${this.brightness}%)`;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(this.tx, this.ty, this.targetRadius, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  }
+
+  class Particle {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.coordinates = [];
+      this.coordinateCount = 5;
+      while (this.coordinateCount--) {
+        this.coordinates.push([this.x, this.y]);
+      }
+      this.angle = random(0, Math.PI * 2);
+      this.speed = random(1, 10);
+      this.friction = 0.95;
+      this.gravity = 0.7;
+      this.hue = random(0, 360);
+      this.brightness = random(50, 80);
+      this.alpha = 1;
+      this.decay = random(0.015, 0.03);
+    }
+    update(index) {
+      this.coordinates.pop();
+      this.coordinates.unshift([this.x, this.y]);
+      this.speed *= this.friction;
+      this.x += Math.cos(this.angle) * this.speed;
+      this.y += Math.sin(this.angle) * this.speed + this.gravity;
+      this.alpha -= this.decay;
+
+      if (this.alpha <= 0) {
+        particles.splice(index, 1);
+      }
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.moveTo(this.coordinates[this.coordinates.length - 1][0], this.coordinates[this.coordinates.length - 1][1]);
+      ctx.lineTo(this.x, this.y);
+      ctx.strokeStyle = `hsla(${this.hue}, 100%, ${this.brightness}%, ${this.alpha})`;
+      ctx.stroke();
+    }
+  }
+
+  function createParticles(x, y) {
+    const particleCount = 30;
+    for(let i=0; i < particleCount; i++) {
+      particles.push(new Particle(x, y));
+    }
+  }
+
+  function loop() {
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.fillRect(0, 0, cw, ch);
+    ctx.globalCompositeOperation = 'lighter';
+
+    let i = fireworks.length;
+    while (i--) {
+      fireworks[i].draw();
+      fireworks[i].update(i);
+    }
+
+    i = particles.length;
+    while (i--) {
+      particles[i].draw();
+      particles[i].update(i);
+    }
+
+    if (fireworks.length < 5) {
+      const sx = cw / 2;
+      const sy = ch;
+      const tx = random(0, cw);
+      const ty = random(0, ch / 2);
+      fireworks.push(new Firework(sx, sy, tx, ty));
+    }
+
+    requestAnimationFrame(loop);
+  }
+</script>
+
+</body>
+</html>
